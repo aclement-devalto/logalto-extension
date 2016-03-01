@@ -185,11 +185,17 @@ angular.module('prome.controllers')
 			};
 
 			$scope.togglePanel = function() {
-				var toolbarPanel = document.getElementById('logalto-dev-panel');
+				var toolbarPanel = document.getElementById('logalto-dev-panel'),
+					toolbarIcon = document.getElementById('logalto-dev-toolbar');
 
 				if (toolbarPanel.className.indexOf('open') > -1) {
 					toolbarPanel.className = toolbarPanel.className.replace(/open/, '');
+
+					toolbarIcon.className = toolbarIcon.className.replace(/open/, '');
 				} else {
+					toolbarIcon.className = toolbarIcon.className.replace(/(success|error)/, '');
+					toolbarIcon.className += 'open';
+
 					toolbarPanel.className += 'open';
 				}
 			};

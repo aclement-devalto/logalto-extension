@@ -30,8 +30,8 @@
 }
 
 $logalto-color: #1EC1CE;
-$console-color: rgba(35,35,35,0.8);
-$console-text-color: #eee;
+$console-color: #fcfcfc;
+$console-text-color: #444;
 $success-color: #5cb85c;
 $error-color: #d9534f;
 
@@ -75,6 +75,10 @@ $error-color: #d9534f;
 	&.error {
 		background-color: $error-color;
 	}
+
+	&.open {
+		display: none;
+	}
 }
 
 #logalto-dev-panel {
@@ -88,12 +92,9 @@ $error-color: #d9534f;
 	box-sizing: border-box;
 	overflow: hidden;
 	font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+	-webkit-font-smoothing: antialiased;
 
 	@include transition(height 0.3s);
-
-	&.open {
-		height: 100%;
-	}
 
 	.glyphicon {
 		font-family: 'prome';
@@ -126,11 +127,15 @@ $error-color: #d9534f;
 		}
 
 		.sidebar {
-			background-color: rgba(0,0,0,0.7);
+			background-color: white;
+			box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
 			width: 200px;
 			float: left;
 			height: 100%;
-			padding-top: 20px;
+			padding-top: 10px;
+			z-index: 999;
+			display: none;
+			position: absolute;
 
 			ul {
 				list-style-type: none;
@@ -145,18 +150,20 @@ $error-color: #d9534f;
 					&.nav-header {
 						padding: 5px;
 						padding-left: 20px;
+						color: #444;
 						text-transform: uppercase;
+						font-weight: bold;
 					}
 
 					&.action {
 						a {
 							display: block;
 							padding: 8px 20px;
-							color: $logalto-color;
+							color: #444;
 							text-decoration: none;
 
 							&:hover {
-								background-color: rgba(255,255,255,0.2);
+								background-color: rgba(0,0,0,0.05);
 							}
 
 							.glyphicon {
@@ -194,18 +201,18 @@ $error-color: #d9534f;
 
 						&.active {
 							a {
-								background-color: rgba(255,255,255,0.2);
-								color: lighten($logalto-color, 10);
+								background-color: $logalto-color;
+								color: white;
 
 								&:hover, &:focus {
-									background-color: rgba(255,255,255,0.2);
-									color: lighten($logalto-color, 10);
+									background-color: $logalto-color;
+									color: white;
 								}
 							}
 
 							.spinner {
 								.double-bounce1, .double-bounce2 {
-									background-color: lighten($logalto-color, 10);
+									background-color: white;
 								}
 							}
 						}
@@ -243,11 +250,11 @@ $error-color: #d9534f;
 		}
 
 		.main-view {
+			margin-left: 200px;
 			width: calc(100% - 200px);
 			float: left;
 			height: 100%;
 			background-color: $console-color;
-			padding: 10px 30px 30px;
 			color: $console-text-color;
 
 			button.btn {
@@ -269,10 +276,17 @@ $error-color: #d9534f;
 
 			.request {
 				h3 {
-					margin-bottom: 20px;
-					font-size: 20px;
+					background-color: $logalto-color;
+					color: white;
+					margin: 0;
+					font-size: 24px;
+					font-weight: 500;
+
+					padding: 20px 30px;
 
 					span.glyphicon {
+						position: relative;
+						top: -3px;
 						float: right;
 					}
 
@@ -280,7 +294,7 @@ $error-color: #d9534f;
 					  width: 30px;
 					  height: 30px;
 					  position: relative;
-					  top: -5px;
+					  top: -8px;
 					  display: none;
 					  float: right;
 					}
@@ -289,7 +303,7 @@ $error-color: #d9534f;
 					  width: 30px;
 					  height: 30px;
 					  border-radius: 50%;
-					  background-color: $logalto-color;
+					  background-color: white;
 					  opacity: 0.6;
 					  position: absolute;
 					  
@@ -307,7 +321,7 @@ $error-color: #d9534f;
 						font-size: 10px;
 						text-transform: uppercase;
 						float: right;
-						padding-top: 3px;
+						padding-top: 0px;
 						margin-right: 10px;
 						opacity: 0.7;
 						display: none;
@@ -316,7 +330,7 @@ $error-color: #d9534f;
 
 				&.success {
 					h3 {
-						color: $success-color;
+						background-color: $success-color !important;
 
 						span.glyphicon {
 							@extend .icon-check;
@@ -326,7 +340,7 @@ $error-color: #d9534f;
 
 				&.error {
 					h3 {
-						color: $error-color;
+						background-color: $error-color !important;
 
 						span.glyphicon {
 							@extend .icon-alert;
@@ -362,23 +376,67 @@ $error-color: #d9534f;
 					color: $console-text-color;
 					border: none;
 					border-radius: 0;
-					padding: 20px 0;
+					margin: 30px;
 					font-family: Menlo,Monaco,Consolas,"Courier New",monospace !important;
 					line-height: 1.5em;
 					font-size: 12px;
-					border-top: 1px solid #555;
 				}
 
 				.info {
+					border-top: 1px solid silver;
+					padding: 20px 0 0;
 					font-size: 10px;
 					color: lighten($console-text-color, 20);
+					margin-bottom: 0px;
 				}
 
 				.btn-send {
-					margin-top: 10px;
+					margin-left: 30px;
+					margin-top: 20px;
 					margin-bottom: 20px;
 				}
 			}
+		}
+	}
+
+	.close-button {
+		opacity: 0;
+		position: absolute;
+		left: 0px;
+		bottom: 0px;
+		width: 200px;
+		padding: 15px 20px;
+		color: #444;
+		font-size: 16px;
+		text-decoration: none;
+		z-index: 10000;
+		background-color: rgba(0,0,0,0.05);
+
+		.glyphicon {
+			font-size: 14px;
+			padding-right: 10px;
+		}
+
+		@include transition(opacity 1s);
+
+		&:hover {
+			background-color: rgba(0,0,0,0.2);
+
+			.glyphicon:before {
+				content: "\e602";
+			}
+		}
+	}
+
+	&.open {
+		height: 100%;
+
+		.sidebar {
+			display: block;
+		}
+
+		.close-button {
+			opacity: 1;
 		}
 	}
 }
