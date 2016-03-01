@@ -1,0 +1,29 @@
+{
+    "name": "Logalto Developer Tools",
+    "version": "1.0.0",
+    "description": "Devtools for Logalto",
+    "devtools_page": "devtools.html",
+    "author": "Alexandre Clément - DevAlto",
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ]
+    },
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "permissions": [
+    	"contextMenus",
+        "tabs",
+        "browsingData",
+        "*://*.prome.prod/*",
+        "*://*.prome.dev/*",
+        "*://*.prome3.cloudalto.net/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["*://*.prome.prod/*","*://*.prome.dev/*","*://*.prome3.cloudalto.net/*"],
+            "js": ["vendors/angular.min.js","vendors/angular-local-storage.min.js","js/panel/app.js","js/panel/app-controller.js","js/panel/command-service.js","js/panel/messaging-service.js","js/panel/tenant-service.js","js/content-script.js","js/toolbar.js"],
+            "css": ["css/toolbar.min.css"]
+        }
+    ],
+    "manifest_version": 2
+}

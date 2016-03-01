@@ -1,0 +1,10 @@
+/node_modules/*
+/extension/js/*
+/extension/css/*
+/extension/vendors/*
+/src/styles/temp/*
+/daemons/logs/*
+/daemons/*.pid
+/daemons/*.log
+.DS_Store
+.idea/*
