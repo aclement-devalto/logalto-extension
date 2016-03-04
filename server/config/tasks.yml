@@ -63,14 +63,14 @@ frontend:
         sencha-build:
             title: Build front-end
             label: build all
-            script: app build -p app.theme=tenant-{tenant} --clean
+            script: config -prop app.theme=tenant-{tenant} then app build --clean
             client: tenant
             cancellable: true
             refresh_browser: true
         sencha-resources:
             title: Copy resources
             label: copy resources
-            script: ant -p app.theme=tenant-{tenant} resources
+            script: config -prop app.theme=tenant-{tenant} then ant resources
             client: tenant
             cancellable: true
             refresh_browser: true
@@ -82,7 +82,7 @@ javascript:
         sencha-refresh:
             title: Refresh Javascript files index
             label: refresh index
-            script: app refresh -p app.theme=tenant-{tenant}
+            script: config -prop app.theme=tenant-{tenant} then app refresh
             client: tenant
             cancellable: true
             refresh_browser: true
@@ -90,7 +90,7 @@ javascript:
         sencha-build-js:
             title: Compile Javascript files
             label: build
-            script: ant -p app.theme=tenant-{tenant} js
+            script: config -prop app.theme=tenant-{tenant} then ant js
             client: tenant
             cancellable: true
             refresh_browser: true
@@ -102,7 +102,7 @@ sass:
         sencha-ant-sass:
             title: Compile SASS
             label: compile
-            script: ant -p app.theme=tenant-{tenant} sass
+            script: config -prop app.theme=tenant-{tenant} then ant sass
             client: tenant
             cancellable: true
             refresh_browser: true

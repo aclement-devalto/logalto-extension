@@ -38,7 +38,7 @@ var executeTask = function(task, callback) {
 		tenantParts[0] = capitalizeFirstLetter(tenantParts[0]);
 		tenantParts[1] = capitalizeFirstLetter(tenantParts[1]);
 		
-		camelCaseTenant = tenantParts.join();
+		camelCaseTenant = tenantParts.join('');
 
 		// Connect to VM using SSH key
 		var ssh = new SSH({
