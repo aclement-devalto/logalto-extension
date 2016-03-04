@@ -1,5 +1,3 @@
-console.log('content script loaded');
-
 var lastElementContext;
 
 document.addEventListener('contextmenu', function(event) {

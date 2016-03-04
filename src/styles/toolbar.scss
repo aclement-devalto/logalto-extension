@@ -165,7 +165,8 @@ $error-color: #d9534f;
 							padding: 8px 20px;
 							color: #444;
 							text-decoration: none;
-
+							cursor: pointer;
+							
 							&:hover {
 								background-color: rgba(0,0,0,0.05);
 							}
@@ -457,7 +458,8 @@ $error-color: #d9534f;
 		text-decoration: none;
 		z-index: 10000;
 		background-color: rgba(0,0,0,0.05);
-
+		cursor: pointer;
+		
 		.glyphicon {
 			font-size: 14px;
 			padding-right: 10px;
