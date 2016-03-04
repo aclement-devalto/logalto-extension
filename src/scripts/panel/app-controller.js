@@ -75,7 +75,7 @@ angular.module('prome.controllers')
 				};
 
 				// Send command request to virtual machine listener
-				Commander.sendRequest(command.alias, $scope.currentPage.tenant.alias, $scope.currentPage.requests[command.alias]);
+				Commander.sendRequest(command.alias, command, $scope.currentPage.tenant.alias, $scope.currentPage.requests[command.alias]);
 			};
 
 			$scope.togglePanel = function() {

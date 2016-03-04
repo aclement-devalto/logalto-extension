@@ -18,21 +18,18 @@ angular.module('prome.services')
 				queue: [],
 				shouldReload: false,
 
-				sendRequest: function(commandAlias, tenantAlias, requestObj) {
+				sendRequest: function(commandAlias, command, tenantAlias, requestObj) {
 					var me = this;
 
 					var task = {
 						commandAlias: commandAlias,
+						command: command,
 						tenantAlias: tenantAlias,
 						requestObj: requestObj
 					};
 
-					if (commandAlias == 'create-database') {
-						task.waitFor = 'drop-database';
-					} else if (commandAlias == 'load-common-fixtures') {
-						task.waitFor = 'create-database';
-					} else if (commandAlias == 'load-tenant-fixtures') {
-						task.waitFor = 'load-common-fixtures';
+					if (command.wait_for) {
+						task.waitFor = command.wait_for;
 					}
 
 					// Queue task
@@ -130,13 +127,13 @@ angular.module('prome.services')
 										localStorage.removeItem('prome_user');
 									}
 
-									if (task.reload_browser) {
+									if (task.command.refresh_browser) {
 										me.shouldReload = true;
 									}
 
 									// Reload inspected page if no other requests waiting
 									if (me.requestsWaitingCount == 0 && me.shouldReload) {
-										location.reload();
+										Messaging.sendRequest({action: 'reload-tab'});
 									}
 
 									if (response.output) {

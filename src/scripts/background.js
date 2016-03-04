@@ -16,3 +16,39 @@ chrome.contextMenus.onClicked.addListener(onClickHandler);
 function onClickHandler(info, tab) {
 	chrome.tabs.sendMessage(tab.id, 'remove-selected-loading-mask');
 };
+
+// Listen to internal messaging from inspected pages or devtools panel
+chrome.runtime.onConnect.addListener(function (port) {
+	if (port.name !== 'devtools') return;
+
+	var extensionListener = function (message, messageSender) {
+
+		switch (message.action) {
+			case 'new-tab':
+				// Open new tab with provided URL
+				chrome.tabs.create({
+					url: message.content.url
+				});
+			break;
+			case 'reload-tab':
+				// Clear cache & reload tab
+				chrome.browsingData.removeCache({
+					"since": new Date().setDate(new Date().getDate() - 7)
+				}, function(){
+					chrome.tabs.reload(messageSender.sender.tab.id);
+				});
+			break;
+			default:
+				//Pass message to inspectedPage
+				chrome.tabs.sendMessage(message.tabId, message, sendResponse);
+		}
+    };
+
+    // Listens to messages sent from the panel
+	port.onMessage.addListener(extensionListener);
+
+    port.onDisconnect.addListener(function(port) {
+		port.onMessage.removeListener(extensionListener);
+    });
+
+});

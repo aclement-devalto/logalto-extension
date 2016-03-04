@@ -31,15 +31,15 @@ angular.module('prome.services')
 			 * Send request message to background page
 			 * @param message
 			 */
-			// Messaging.sendRequest = function(message) {
-			// 	Messaging.port.postMessage(message);
-			// };
+			Messaging.sendRequest = function(message) {
+				Messaging.port.postMessage(message);
+			};
 
 			Messaging.init = function() {
 				// Create a port with background page for continous message communication
-				// Messaging.port = chrome.runtime.connect({
-				// 	name: 'devtools'
-				// });
+				Messaging.port = chrome.runtime.connect({
+					name: 'devtools'
+				});
 
 				// // Listen to messages from the background page
 				// Messaging.port.onMessage.addListener(function(message){
