@@ -6,7 +6,8 @@ var gulp = require('gulp'),
 
 var vendors = [
 	'node_modules/angular/angular.min.js',
-	'node_modules/angular-local-storage/dist/angular-local-storage.min.js'
+	'node_modules/angular-local-storage/dist/angular-local-storage.min.js',
+	'node_modules/socket.io-client/socket.io.js',
 ];
 
 gulp.task('styles', function() {

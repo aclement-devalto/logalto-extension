@@ -11,10 +11,12 @@ angular.module('prome.services')
 				toolbarIcon.className += ' ' + status
 			};
 
+			var serverHostname = 'localhost:7500';
+
 			return {
-				available: false,
 				requestsWaitingCount: 0,
 				queue: [],
+				shouldReload: false,
 
 				sendRequest: function(commandAlias, tenantAlias, requestObj) {
 					var me = this;
@@ -60,71 +62,123 @@ angular.module('prome.services')
 
 				processRequest: function(task, requestObj) {
 					var me = this,
+						socket = io.connect('http://' + serverHostname),
 						startTime;
 
 					toggleToolbarStatus('');
 
-					// Open socket connection to dispatcher
-					var webSocket = new WebSocket('ws://localhost:7500/command');
+					var formatOutput = function (output) {
+						if (!output) {
+							return output;
+						}
 
-					webSocket.onopen = function(event) {
-						startTime = new Date();
+						lines = output.split("\n");
 
-						// Send command order
-						webSocket.send(JSON.stringify({
-							command: task.commandAlias,
-							tenant: task.tenantAlias
-						}));
+						for (i = 0, len = lines.length; i < len; ++i) {
+							lines[i] = String(lines[i]).replace(/\[INF\]/g, '<span style="color: green;">[INF]</span>');
+							lines[i] = String(lines[i]).replace(/\[WRN\]/g, '<span style="color: yellow;">[WRN]</span>');
+							lines[i] = String(lines[i]).replace(/\[ERR\]/g, '<span style="color: red;">[ERR]</span>');
+						}
 
-						//console.log('Commant sent to dispatcher:' + task.commandAlias);
+						return lines.join('<br>');
 					};
 
-					// Wait for response
-					webSocket.onmessage = function(message) {
-						var response = JSON.parse(message.data);
+					// Open socket connection to server backend
+					socket.on('connect', function(){
+						startTime = new Date();
 
-						var formatOutput = function (output) {
-							if (!output) {
-								return output;
-							}
+						socket.emit('execute-task', {
+							task: task.commandAlias,
+							tenant: task.tenantAlias
+						});
 
-							lines = output.split("\n");
-
-							for (i = 0, len = lines.length; i < len; ++i) {
-								lines[i] = String(lines[i]).replace(/\[INF\]/g, '<span style="color: green;">[INF]</span>');
-								lines[i] = String(lines[i]).replace(/\[WRN\]/g, '<span style="color: yellow;">[WRN]</span>');
-								lines[i] = String(lines[i]).replace(/\[ERR\]/g, '<span style="color: red;">[ERR]</span>');
-							}
-
-							return lines.join('<br>');
-						};
-
-						$rootScope.$apply(function () {
-							if (response.status) {
-								toggleToolbarStatus('success');
-
-								requestObj.status = 'success';
-								requestObj.info = 'Request completed in ' + Math.round((new Date() - startTime) / 1000) + 's.';
-								me.requestsWaitingCount--;
-
-								if ($rootScope.currentPage.activeCommand.alias == task.commandAlias) {
-									requestObj.unread = false;
+						socket.on('task-status', function(response){
+							$rootScope.$apply(function () {
+								var currentOutput = "";
+								if (requestObj.output) {
+									currentOutput = $sce.getTrustedHtml(requestObj.output);
 								}
 
-								// Database cleaned : log out user to prevent 'User not found' exception
-								if (task.commandAlias == 'create-database' || task.commandAlias == 'drop-database' || task.commandAlias == 'reset-setup') {
-									localStorage.removeItem('prome_user');
+								if (response.output) {
+									requestObj.output = $sce.trustAsHtml(currentOutput + formatOutput(response.output));
+								} else if (response.error) {
+									requestObj.output = $sce.trustAsHtml(currentOutput + '<span style="color: red;">' + formatOutput(response.error) + '</span>');
 								}
 
-								// Reload inspected page if no other requests waiting
-								if (me.requestsWaitingCount == 0) {
-									location.reload();
+								setTimeout(function(){
+									var wrapper = document.getElementById('logalto-dev-panel-output-wrapper');
+									wrapper.scrollTop = wrapper.scrollHeight;
+								}, 100);
+							});
+						});
+
+						socket.on('task-complete', function(response) {
+							$rootScope.$apply(function () {
+								if (response.status) {
+									toggleToolbarStatus('success');
+
+									requestObj.status = 'success';
+									requestObj.info = 'Request completed in ' + Math.round((new Date() - startTime) / 1000) + 's.';
+									me.requestsWaitingCount--;
+
+									if ($rootScope.currentPage.activeCommand.alias == task.commandAlias) {
+										requestObj.unread = false;
+									}
+
+									// Database cleaned : log out user to prevent 'User not found' exception
+									if (task.commandAlias == 'create-database' || task.commandAlias == 'drop-database' || task.commandAlias == 'reset-setup') {
+										localStorage.removeItem('prome_user');
+									}
+
+									if (task.reload_browser) {
+										me.shouldReload = true;
+									}
+
+									// Reload inspected page if no other requests waiting
+									if (me.requestsWaitingCount == 0 && me.shouldReload) {
+										location.reload();
+									}
+
+									if (response.output) {
+										var currentOutput = "";
+										if (requestObj.output) {
+											currentOutput = $sce.getTrustedHtml(requestObj.output);
+										}
+
+										requestObj.output = $sce.trustAsHtml(currentOutput + '<br>' + formatOutput(response.output));
+									}
+								} else {
+									toggleToolbarStatus('error');
+
+									requestObj.status = 'error';
+									me.requestsWaitingCount--;
+
+									if ($rootScope.currentPage.activeCommand.alias == task.commandAlias) {
+										requestObj.unread = false;
+									}
+
+									var currentOutput = "";
+									if (requestObj.output) {
+										currentOutput = $sce.getTrustedHtml(requestObj.output);
+									}
+
+									if (response.error) {
+										requestObj.output = $sce.trustAsHtml(currentOutput + '<br><span style="color: red;">' + formatOutput(response.error) + '</span>');
+									} else if (response.output) {
+										requestObj.output = $sce.trustAsHtml(currentOutput + '<br>' + formatOutput(response.output));
+									}
+
+									requestObj.info = 'Request failed.';
 								}
 
-								requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
-							} else {
-								toggleToolbarStatus('error');
+								me.completeTask(task, response);
+							});
 
+							socket.disconnect();
+				        });
+
+				        socket.on('disconnect', function(message) {
+							if (requestObj.status == 'loading') {
 								requestObj.status = 'error';
 								me.requestsWaitingCount--;
 
@@ -132,38 +186,14 @@ angular.module('prome.services')
 									requestObj.unread = false;
 								}
 
-								if (response.error) {
-									requestObj.output = $sce.trustAsHtml('<span style="color: red;">' + formatOutput(response.error) + '</span>');
-								} else {
-									requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
-								}
+								requestObj.info = 'Request failed: connection closed';
 
-								requestObj.info = 'Request failed.';
+								me.completeTask(task, {
+									status: false
+								});
 							}
-
-							me.completeTask(task, response);
 						});
-
-						// Close socket connection
-						webSocket.close();
-					};
-
-					webSocket.onclose = function(message) {
-						if (requestObj.status == 'loading') {
-							requestObj.status = 'error';
-							me.requestsWaitingCount--;
-
-							if ($rootScope.currentPage.activeCommand.alias == task.commandAlias) {
-								requestObj.unread = false;
-							}
-
-							requestObj.info = 'Request failed: connection closed';
-
-							me.completeTask(task, {
-								status: false
-							});
-						}
-					};
+				    });
 				},
 
 				completeTask: function(task, response) {
@@ -195,19 +225,32 @@ angular.module('prome.services')
 				},
 
 				ping: function() {
-					$http.get('http://localhost:7500/ping', {
+					$http.get('http://' + serverHostname + '/ping', {
 						timeout: 1000
 					})
 						.success(function(response, status) {
-							this.available = true;
+							$rootScope.serverIsOnline = true;
 						})
 						.error(function(response, status) {
-							this.available = false;
+							$rootScope.serverIsOnline = false;
 						});
 				},
 
-				getStatus: function() {
-					return this.available;
+				fetchTasksList: function() {
+					var promise = $http.get('http://' + serverHostname + '/tasks', {
+						timeout: 1000
+					})
+						.then(function(response) {
+							if (response.status == 200) {
+								return response.data;
+							} else {
+								return false;
+							}						
+						}, function(response) {							
+							return false;
+						});
+
+					return promise;
 				}
 			};
 		}

@@ -1,0 +1,108 @@
+---
+database:
+    title: Database
+    type: backend
+    tasks:
+        create-database:
+            title: Create database
+            label: create
+            script: php bin/phing create-database
+            cancellable: true
+            wait_for: drop-datatabase
+
+        drop-database:
+            title: Drop database
+            label: drop
+            confirm: Do you really want to drop the database?
+            script: php bin/console doctrine:database:drop --force
+
+        database-schema-diff:
+            title: Generate diff
+            label: generate diff
+            script: php bin/console doctrine:migrations:diff
+
+        #migrate-database:
+        #    title: Migrate
+        #    label: migrate
+        #    script: php bin/console doctrine:migrations:migrate --force
+
+backend:
+    title: Back-end
+    type: backend
+    tasks:
+        reset-setup:
+            title: Reset backend setup
+            label: reset setup
+            script: php bin/console doctrine:database:drop --force && composer install && php bin/phing create-database && php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v && php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/{tenant} --no-interaction -v
+            cancellable: true
+            refresh_browser: true
+
+        load-common-fixtures:
+            title: Load common fixtures
+            label: load common fixtures
+            script: php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v
+            cancellable: true
+            wait_for: create-database
+
+        load-tenant-fixtures:
+            title: Load tenant fixtures
+            label: load tenant fixtures
+            script: php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/{tenant} --no-interaction -v
+            cancellable: true
+            wait_for: load-common-fixtures
+
+        clear-cache:
+            title: Clearing backend cache
+            label: clear cache
+            script: php bin/console cache:clear --env=dev
+
+frontend:
+    title: Front-end
+    type: frontend
+    tasks:
+        sencha-build:
+            title: Build front-end
+            label: build all
+            script: app build -p app.theme=tenant-{tenant} --clean
+            client: tenant
+            cancellable: true
+            refresh_browser: true
+        sencha-resources:
+            title: Copy resources
+            label: copy resources
+            script: ant -p app.theme=tenant-{tenant} resources
+            client: tenant
+            cancellable: true
+            refresh_browser: true
+
+javascript:
+    title: Javascript
+    type: frontend
+    tasks:
+        sencha-refresh:
+            title: Refresh Javascript files index
+            label: refresh index
+            script: app refresh -p app.theme=tenant-{tenant}
+            client: tenant
+            cancellable: true
+            refresh_browser: true
+
+        sencha-build-js:
+            title: Compile Javascript files
+            label: build
+            script: ant -p app.theme=tenant-{tenant} js
+            client: tenant
+            cancellable: true
+            refresh_browser: true
+
+sass:
+    title: SASS
+    type: frontend
+    tasks:
+        sencha-ant-sass:
+            title: Compile SASS
+            label: compile
+            script: ant -p app.theme=tenant-{tenant} sass
+            client: tenant
+            cancellable: true
+            refresh_browser: true

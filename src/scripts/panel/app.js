@@ -24,7 +24,8 @@ angular.module('prome', [
 				requests: {}
 			};
 
-			$rootScope.tenants = [];
+			$rootScope.serverIsOnline = true;
+			$rootScope.tasks = {};
 		}
 	]);
 

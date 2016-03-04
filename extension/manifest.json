@@ -21,7 +21,7 @@
     "content_scripts": [
         {
             "matches": ["*://*.prome.prod/*","*://*.prome.dev/*","*://*.prome3.cloudalto.net/*"],
-            "js": ["vendors/angular.min.js","vendors/angular-local-storage.min.js","js/panel/app.js","js/panel/app-controller.js","js/panel/command-service.js","js/panel/messaging-service.js","js/panel/tenant-service.js","js/content-script.js","js/toolbar.js"],
+            "js": ["vendors/angular.min.js","vendors/angular-local-storage.min.js","vendors/socket.io.js","js/panel/app.js","js/panel/app-controller.js","js/panel/command-service.js","js/panel/messaging-service.js","js/panel/tenant-service.js","js/content-script.js","js/toolbar.js"],
             "css": ["css/toolbar.min.css"]
         }
     ],

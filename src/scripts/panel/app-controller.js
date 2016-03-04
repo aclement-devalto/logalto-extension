@@ -4,113 +4,7 @@ angular.module('prome.controllers')
 
 		function($rootScope, $scope, $window, localStorageService, Tenant, Messaging, Commander){
 
-			$scope.commands = {
-				database:
-					{
-						title: 'Database',
-						actions:
-							{
-								'create-database': {
-									title: 'Creating database',
-									label: 'create'
-								},
-								'drop-database': {
-									title: 'Dropping database',
-									label: 'drop',
-									confirm: 'Do you really want to drop the database ?'
-								}
-							}
-					},
-				backend:
-					{
-						title: 'Back-end',
-						actions:
-							{
-								'reset-setup': {
-									title: 'Reset backend setup',
-									label: 'reset setup',
-									reload: true
-								},
-								'load-common-fixtures': {
-									title: 'Loading common fixtures',
-									label: 'load common fixtures'
-								},
-								'load-tenant-fixtures': {
-									title: 'Loading tenant fixtures',
-									label: 'load tenant fixtures',
-									reload: true
-								},
-								'clear-cache': {
-									title: 'Clearing backend cache',
-									label: 'clear cache'
-								}
-							}
-					},
-				frontend:
-					{
-						title: 'Front-end',
-						actions:
-							{
-								'sencha-build': {
-									title: 'Building front-end',
-									label: 'build all',
-									reload: true
-								}
-							}
-					},
-				resources:
-					{
-						title: 'Resources',
-						actions:
-							{
-								'sencha-resources': {
-									title: 'Copying resources',
-									label: 'copy',
-									reload: true
-								}
-							}
-					},
-				javascript:
-					{
-						title: 'Javascript',
-						actions:
-							{
-								'sencha-refresh': {
-									title: 'Refresh Javascript files index',
-									label: 'refresh index',
-									reload: true
-								},
-								'sencha-build-js': {
-									title: 'Compiling Javascript files',
-									label: 'build',
-									reload: true
-								}
-							}
-					},
-				sass:
-					{
-						title: 'SASS',
-						actions:
-							{
-								'sencha-ant-sass': {
-									title: 'Compiling SASS',
-									label: 'compile',
-									reload: true
-								}
-							}
-					}
-			};
-			
-			/*$scope.newUrl = {
-				tenant: $scope.tenants[0].alias,
-				env: 'dev'
-			};*/
-
-
-			$scope.currentPage = $rootScope.currentPage;
-			$scope.isCommanderAvailable = function() {
-				return Commander.getStatus();
-			};
+			$scope.tasks = {};
 
 			/**
 			 * Manually refresh current inspected page
@@ -121,7 +15,7 @@ angular.module('prome.controllers')
 				}
 			};
 
-			$scope.pingCommander = function() {
+			$scope.pingServer = function() {
 				Commander.ping();
 			};
 
@@ -152,8 +46,8 @@ angular.module('prome.controllers')
 			 * @param {boolean} launchRequest
 			 */
 			$scope.switchCommand = function(commandAlias, categoryAlias, launchRequest) {
-				var category = $scope.commands[categoryAlias],
-					command = category.actions[commandAlias];
+				var category = $scope.tasks[categoryAlias],
+					command = category.tasks[commandAlias];
 
 				if ($scope.currentPage.requests[commandAlias]) {
 					$scope.currentPage.requests[commandAlias].unread = false;
@@ -187,7 +81,6 @@ angular.module('prome.controllers')
 			$scope.togglePanel = function() {
 				var toolbarPanel = document.getElementById('logalto-dev-panel'),
 					toolbarIcon = document.getElementById('logalto-dev-toolbar');
-
 				if (toolbarPanel.className.indexOf('open') > -1) {
 					toolbarPanel.className = toolbarPanel.className.replace(/open/, '');
 
@@ -200,9 +93,22 @@ angular.module('prome.controllers')
 				}
 			};
 
+			$scope.fetchTasks = function() {
+				Commander.fetchTasksList().then(function(tasks){
+					if (tasks) {
+						$scope.serverIsOnline = true;
+						$scope.tasks = tasks;
+					} else {
+						$scope.serverIsOnline = false;
+					}
+				});
+			};
+
 			$scope.init = function() {
 				$scope.currentPage = $rootScope.currentPage;
 				angular.merge($rootScope.currentPage, Tenant.getCurrentPageInfo());
+
+				$scope.serverIsOnline = $rootScope.serverIsOnline;
 
 				var toolbar = document.createElement('div');
 				toolbar.id = 'logalto-dev-toolbar';
@@ -210,6 +116,8 @@ angular.module('prome.controllers')
 				document.body.appendChild(toolbar);
 
 				toolbar.addEventListener('click', $scope.togglePanel);
+
+				$scope.fetchTasks();
 			};
 
 			$scope.init();
