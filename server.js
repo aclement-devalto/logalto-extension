@@ -4,7 +4,7 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 7500;
 
-var automator = require('./lib/automator.js');
+var automator = require('./server/lib/automator.js');
 
 server.listen(port, function () {
   console.log('Server listening at port %d', port);

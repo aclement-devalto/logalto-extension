@@ -7,7 +7,7 @@ var config = {};
 	// CUSTOM CONFIG
 
 	// Path to Logalto on host machine
-	config.LOGALTO_DIR = process.env.HOME + '/Projets/prome3'    // Update this variable with your own local path to Logalto
+	config.LOGALTO_DIR = process.env.HOME + '/Projets/logalto'    // Update this variable with your own local path to Logalto
 
 //----------------------------------------------------------------
 

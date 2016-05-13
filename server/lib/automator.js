@@ -2,10 +2,10 @@ var YAML = require('yamljs'),
 	merge = require('merge'),
 	SSH = require('simple-ssh'),
 	config = require('../config/config.js'),
-	ansi_up = require('ansi_up');;
+	ansi_up = require('ansi_up');
 
 // Load tasks file (path relative to server dir)
-var tasks = YAML.load('./config/tasks.yml');
+var tasks = YAML.load('./server/config/tasks.yml');
 
 var findTaskByAlias = function(requestedAlias) {
 	var task;

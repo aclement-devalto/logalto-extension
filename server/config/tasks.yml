@@ -56,6 +56,12 @@ backend:
             label: clear cache
             script: php bin/console cache:clear --env=dev
 
+        run-tests:
+            title: Run tests
+            label: run tests
+            script: php bin/phpunit
+            cancellable: true
+
 frontend:
     title: Front-end
     type: frontend
